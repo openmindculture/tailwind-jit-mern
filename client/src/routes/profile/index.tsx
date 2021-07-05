@@ -1,9 +1,9 @@
 /** @jsx h */
 import { h, FunctionComponent } from 'preact';
 import { useState } from 'preact/hooks';
+import fetchRetry from '../../util/fetchRetry.js';
 
 const API_ORIGIN = 'http://localhost:9000';
-const asJson = r => r.json();
 
 // Note: `user` comes from the URL, courtesy of our router
 // so it is actually only a string containing a name, not a user object,
@@ -14,9 +14,11 @@ const Profile: FunctionComponent<{ user?: string }> = ({ user }) => {
   const [count, setCount] = useState(10);
 
   const loadItems = () => {
-    fetch(`${API_ORIGIN}/v0/`)
-      .then(asJson)
-      .then(items => setItems(items));
+    fetchRetry(`${API_ORIGIN}/v0/`)
+      .then(items => setItems(items))
+      .catch((err) => {
+        console.log(`failed to fetch (catching fetchRetry.catch) err: ${err}`);
+      });
   }
 
   return (
